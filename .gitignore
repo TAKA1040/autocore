@@ -46,3 +46,4 @@ next-env.d.ts
 # Gemini CLI files
 prompt.txt
 SECURITY_AND_CI_DECLARATION.md
+.vercel
