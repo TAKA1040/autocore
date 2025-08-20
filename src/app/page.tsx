@@ -1,14 +1,24 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+'use client'
 
-export default async function Page() {
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client' // serverではなくclientをインポート
+
+export default function Page() {
+  const router = useRouter()
   const supabase = createClient()
 
-  const { data, error } = await supabase.auth.getUser()
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      if (data.user) {
+        router.push('/menu')
+      } else {
+        router.push('/login')
+      }
+    }
+    checkUser()
+  }, [router, supabase])
 
-  if (error || !data?.user) {
-    redirect('/login')
-  }
-
-  redirect('/menu')
+  return <div>Loading...</div> // ローディング表示
 }
