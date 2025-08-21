@@ -1,0 +1,1 @@
+UPDATE public.profiles SET role = 'ADMIN', status = 'APPROVED' WHERE email = 'dash201206@gmail.com';

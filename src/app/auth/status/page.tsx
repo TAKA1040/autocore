@@ -12,12 +12,10 @@ export default async function StatusPage() {
     return redirect('/login')
   }
 
-  // profilesテーブルからユーザーのステータスを取得
+  // profilesテーブルからユーザーのステータスをRPC関数で取得
   const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('status')
-    .eq('id', user.id)
-    .single()
+    .rpc('get_user_profile_by_id', { user_id_in: user.id }) // RPC関数を呼び出す
+    .single() // single() を使うことで、結果が1件であることを期待
 
   if (error || !profile) {
     // プロファイルが見つからない場合のエラーハンドリング
