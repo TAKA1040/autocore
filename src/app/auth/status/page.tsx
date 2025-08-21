@@ -2,6 +2,15 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import LogoutButton from '@/app/menu/LogoutButton' // 既存のログアウトボタンを再利用
 
+interface UserProfile {
+  id: string;
+  email: string;
+  status: 'PENDING' | 'APPROVED';
+  role: 'USER' | 'ADMIN';
+  created_at: string;
+}
+
+
 export default async function StatusPage() {
   const supabase = await createClient()
 
@@ -13,9 +22,11 @@ export default async function StatusPage() {
   }
 
   // profilesテーブルからユーザーのステータスをRPC関数で取得
-  const { data: profile, error } = await supabase
+  const { data: profileData, error } = await supabase
     .rpc('get_user_profile_by_id', { user_id_in: user.id }) // RPC関数を呼び出す
-    .single() // single() を使うことで、結果が1件であることを期待
+    .single(); // single() を使うことで、結果が1件であることを期待
+
+  const profile = profileData as UserProfile | null; // ここでキャスト
 
   if (error || !profile) {
     // プロファイルが見つからない場合のエラーハンドリング
