@@ -26,8 +26,9 @@ export default async function StatusPage() {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
             <div className="p-8 text-center bg-white rounded-lg shadow-md">
-                <h1 className="mb-4 text-2xl font-bold text-red-600">エラー</h1>
-                <p className="mb-4">ユーザープロファイルの取得に失敗しました。</p>
+                <h1 className="mb-4 text-2xl font-bold text-red-600">認証エラー</h1>
+                <p className="mb-4">ユーザー情報の取得に失敗しました。アカウントがまだ有効化されていない可能性があります。管理者にお問い合わせください。</p>
+                <p className="mb-4 text-xs text-gray-500">Error: {error?.message || 'Profile not found.'}</p>
                 <LogoutButton />
             </div>
         </div>
