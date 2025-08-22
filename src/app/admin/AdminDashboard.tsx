@@ -31,6 +31,8 @@ export default function AdminDashboard({ pendingUsers: initialPending, approvedU
   const [pendingUsers, setPendingUsers] = useState<PendingUser[]>(initialPending)
   const [approvedUsers, setApprovedUsers] = useState<ApprovedUser[]>(initialApproved)
   const [approving, setApproving] = useState<Set<string>>(new Set())
+  const [deleting, setDeleting] = useState<Set<string>>(new Set())
+  const [updatingRole, setUpdatingRole] = useState<Set<string>>(new Set())
   const supabase = createClient()
 
   const handleApprove = async (pendingUser: PendingUser) => {
@@ -39,10 +41,10 @@ export default function AdminDashboard({ pendingUsers: initialPending, approvedU
     setApproving(prev => new Set(prev).add(pendingUser.id))
     
     try {
-      // 1. profilesテーブルに追加
-      const { error: insertError } = await supabase
+      // 1. profilesテーブルに承認状態でupsert（既存PENDINGがあれば更新、なければ作成）
+      const { error: upsertError } = await supabase
         .from('profiles')
-        .insert([
+        .upsert([
           {
             id: pendingUser.id,
             email: pendingUser.email,
@@ -51,12 +53,11 @@ export default function AdminDashboard({ pendingUsers: initialPending, approvedU
           }
         ])
 
-      if (insertError) {
-        console.error('Error creating profile:', insertError)
-        alert(`承認エラー: ${insertError.message}`)
+      if (upsertError) {
+        console.error('Error upserting profile:', upsertError)
+        alert(`承認エラー: ${upsertError.message}`)
         return
       }
-
       // 2. pending_usersから削除
       const { error: deleteError } = await supabase
         .from('pending_users')
@@ -91,6 +92,111 @@ export default function AdminDashboard({ pendingUsers: initialPending, approvedU
         const newSet = new Set(prev)
         newSet.delete(pendingUser.id)
         return newSet
+      })
+    }
+  }
+
+  const handleDeleteApproved = async (approvedUser: ApprovedUser) => {
+    if (deleting.has(approvedUser.id)) return
+
+    // ガード: 自分自身の削除禁止 & 最後の管理者の削除禁止
+    try {
+      const { data: meData } = await supabase.auth.getUser()
+      const me = meData?.user
+      if (me?.id && approvedUser.id === me.id) {
+        alert('自分自身を削除することはできません。別の管理者に依頼してください。')
+        return
+      }
+      const adminCount = approvedUsers.filter(u => u.role === 'ADMIN').length
+      if (approvedUser.role === 'ADMIN' && adminCount <= 1) {
+        alert('最後の管理者は削除できません。先に別のユーザーを管理者に昇格させてください。')
+        return
+      }
+    } catch (e) {
+      console.error('Delete guard checks failed:', e)
+      alert('削除前チェック中にエラーが発生しました。しばらくしてから再度お試しください。')
+      return
+    }
+
+    if (!confirm(`${approvedUser.email} を承認済みから削除しますか？\nこの操作後、ユーザーは再度ログインしても承認待ちになります。`)) return
+
+    setDeleting(prev => new Set(prev).add(approvedUser.id))
+    try {
+      const { error: deleteProfileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', approvedUser.id)
+
+      if (deleteProfileError) {
+        console.error('Error deleting approved profile:', deleteProfileError)
+        alert(`削除エラー: ${deleteProfileError.message}`)
+        return
+      }
+
+      // UI 更新
+      setApprovedUsers(prev => prev.filter(u => u.id !== approvedUser.id))
+      alert(`${approvedUser.email} を削除しました。`)
+    } catch (err) {
+      console.error('Delete approved user error:', err)
+      alert('削除処理中にエラーが発生しました')
+    } finally {
+      setDeleting(prev => {
+        const s = new Set(prev)
+        s.delete(approvedUser.id)
+        return s
+      })
+    }
+  }
+
+  const handleUpdateRole = async (user: ApprovedUser, newRole: 'ADMIN' | 'USER') => {
+    if (updatingRole.has(user.id)) return
+
+    // ガード: 自己降格の禁止 & 最後の管理者の降格禁止
+    if (newRole === 'USER') {
+      try {
+        const { data: meData } = await supabase.auth.getUser()
+        const me = meData?.user
+
+        // 自己降格の禁止
+        if (me?.id && user.id === me.id && user.role === 'ADMIN') {
+          alert('自分自身をユーザーに降格することはできません。別の管理者に依頼してください。')
+          return
+        }
+
+        // 最後の管理者の降格禁止
+        const adminCount = approvedUsers.filter(u => u.role === 'ADMIN').length
+        if (user.role === 'ADMIN' && adminCount <= 1) {
+          alert('最後の管理者は降格できません。先に別のユーザーを管理者に昇格させてください。')
+          return
+        }
+      } catch (e) {
+        console.error('Guard checks failed:', e)
+        alert('権限チェック中にエラーが発生しました。しばらくしてから再度お試しください。')
+        return
+      }
+    }
+
+    setUpdatingRole(prev => new Set(prev).add(user.id))
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', user.id)
+      if (error) {
+        console.error('Error updating role:', error)
+        alert(`権限更新エラー: ${error.message}`)
+        return
+      }
+      setApprovedUsers(prev => prev.map(u => u.id === user.id ? { ...u, role: newRole } : u))
+      alert(`${user.email} を ${newRole === 'ADMIN' ? '管理者' : 'ユーザー'} に更新しました。`)
+    } catch (e) {
+      console.error('Update role error:', e)
+      alert('権限更新中にエラーが発生しました')
+    } finally {
+      setUpdatingRole(prev => {
+        const s = new Set(prev)
+        s.delete(user.id)
+        return s
       })
     }
   }
@@ -275,6 +381,9 @@ export default function AdminDashboard({ pendingUsers: initialPending, approvedU
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     承認日時
                   </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    操作
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -310,6 +419,42 @@ export default function AdminDashboard({ pendingUsers: initialPending, approvedU
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(user.created_at)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                      <button
+                        onClick={() => handleUpdateRole(user, user.role === 'ADMIN' ? 'USER' : 'ADMIN')}
+                        disabled={updatingRole.has(user.id)}
+                        className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white ${
+                          updatingRole.has(user.id)
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : user.role === 'ADMIN'
+                              ? 'bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+                              : 'bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500'
+                        }`}
+                      >
+                        {updatingRole.has(user.id) ? '更新中...' : (user.role === 'ADMIN' ? '👤 ユーザーに降格' : '👑 管理者に昇格')}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteApproved(user)}
+                        disabled={deleting.has(user.id)}
+                        className={`inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white ${
+                          deleting.has(user.id)
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
+                        }`}
+                      >
+                        {deleting.has(user.id) ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            削除中...
+                          </>
+                        ) : (
+                          '🗑 削除'
+                        )}
+                      </button>
                     </td>
                   </tr>
                 ))}

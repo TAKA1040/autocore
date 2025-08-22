@@ -5,13 +5,18 @@ import { AUTH_CONFIG, isPreApprovedEmail } from '../../../lib/auth-config'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
+  console.log('🚀 Callback route called')
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/'
 
+  console.log('Code:', code ? 'Present' : 'Missing')
+  console.log('Origin:', origin)
+
   if (code) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
+    console.log('Exchange code error:', error)
     if (!error) {
       // 認証成功後、ユーザー情報を取得してメールアドレスをチェック
       const { data: { user } } = await supabase.auth.getUser()
@@ -20,50 +25,35 @@ export async function GET(request: Request) {
         console.log('Callback - User authenticated:', user.email, 'ID:', user.id)
         console.log('Callback - Pre-approved check:', isPreApprovedEmail(user.email))
         
-        // 事前承認済みメールアドレスかチェック
-        if (isPreApprovedEmail(user.email)) {
-          console.log('Callback - Pre-approved email, redirecting to /auth/status')
-          return NextResponse.redirect(`${origin}/auth/status`)
-        } else {
-          console.log('Callback - Not pre-approved, adding to pending users')
-          
-          // 未承認ユーザーをpending_usersテーブルに記録
+        // 事前承認でなくてもログイン状態を維持して /auth/status へ誘導
+        if (!isPreApprovedEmail(user.email)) {
+          console.log('Callback - Not pre-approved, recording to pending_users (audit)')
           try {
             const { error: pendingError } = await supabase
               .from('pending_users')
-              .upsert({
-                id: user.id,
-                email: user.email,
-                display_name: user.user_metadata?.full_name || user.email,
-                login_attempts: 1,
-                last_attempt_at: new Date().toISOString()
-              }, {
-                onConflict: 'email',
-                // 既存の場合はlogin_attemptsを増加させる
-              })
-
-            if (!pendingError) {
-              // login_attemptsを増加させる
-              await supabase
-                .from('pending_users')
-                .update({
-                  login_attempts: supabase.raw('login_attempts + 1'),
+              .insert([
+                {
+                  id: user.id,
+                  email: user.email,
+                  display_name: user.user_metadata?.full_name || user.email,
+                  login_attempts: 1,
                   last_attempt_at: new Date().toISOString()
-                })
-                .eq('email', user.email)
+                }
+              ])
+
+            if (pendingError && (pendingError as any).code !== '23505') {
+              console.log('Error inserting pending user:', pendingError)
             }
           } catch (err) {
             console.log('Error recording pending user:', err)
           }
-
-          // ログアウトして承認待ちページへ
-          await supabase.auth.signOut()
-          return NextResponse.redirect(`${origin}${AUTH_CONFIG.REDIRECTS.PENDING_APPROVAL}?email=${encodeURIComponent(user.email)}`)
         }
+        return NextResponse.redirect(`${origin}/auth/status`)
       }
     }
   }
 
   // return the user to an error page with instructions
+  console.log('❌ Redirecting to auth error page')
   return NextResponse.redirect(`${origin}${AUTH_CONFIG.REDIRECTS.AUTH_ERROR}`)
 }

@@ -12,7 +12,7 @@ export const AUTH_CONFIG = {
   ],
   
   // デフォルトユーザー設定
-  DEFAULT_USER_STATUS: 'APPROVED' as const,
+  DEFAULT_USER_STATUS: 'PENDING' as const,
   DEFAULT_USER_ROLE: 'USER' as const,
   DEFAULT_ADMIN_ROLE: 'ADMIN' as const,
   

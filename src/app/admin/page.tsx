@@ -1,3 +1,4 @@
+import 'server-only'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { isAdminEmail } from '@/lib/auth-config'
@@ -32,8 +33,16 @@ export default async function AdminPage() {
     return redirect('/login')
   }
 
-  // 管理者権限チェック
-  if (!isAdminEmail(user.email)) {
+  // プロフィールのロールを取得
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role, status')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  // 管理者権限チェック（DBロール or ハードコード管理者）
+  const isAdmin = (profile?.role === 'ADMIN') || isAdminEmail(user.email)
+  if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
         <div className="p-8 text-center bg-white rounded-lg shadow-md">
@@ -51,10 +60,11 @@ export default async function AdminPage() {
     .select('*')
     .order('first_attempt_at', { ascending: false })
 
-  // 承認済みユーザーを取得
+  // 承認済みユーザーを取得（status=APPROVED のみ）
   const { data: approvedUsers, error: approvedError } = await supabase
     .from('profiles')
     .select('*')
+    .eq('status', 'APPROVED')
     .order('created_at', { ascending: false })
 
   if (pendingError || approvedError) {

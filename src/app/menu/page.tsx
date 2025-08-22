@@ -1,4 +1,3 @@
-
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { isAdminEmail } from '@/lib/auth-config'
@@ -13,7 +12,19 @@ export default async function MenuPage() {
     redirect('/login')
   }
 
-  const isAdmin = isAdminEmail(data.user.email)
+  // profiles.status/role を取得
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('status, role')
+    .eq('id', data.user.id)
+    .maybeSingle()
+
+  if (profileError || !profile || profile.status !== 'APPROVED') {
+    redirect('/auth/status')
+  }
+
+  // DBロール or ハードコード管理者（バックドア）
+  const isAdmin = (profile?.role === 'ADMIN') || isAdminEmail(data.user.email)
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

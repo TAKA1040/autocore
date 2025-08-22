@@ -1,24 +1,14 @@
-'use client'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client' // serverではなくclientをインポート
+export default async function Page() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-export default function Page() {
-  const router = useRouter()
-  const supabase = createClient()
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      if (data.user) {
-        router.push('/menu')
-      } else {
-        router.push('/login')
-      }
-    }
-    checkUser()
-  }, [router, supabase])
-
-  return <div>Loading...</div> // ローディング表示
+  if (user) {
+    // ログイン済みは常にステータスページへ。承認済みならそこでメニューへ遷移。
+    redirect('/auth/status')
+  }
+  // 未ログインはログインページへ
+  redirect('/login')
 }
