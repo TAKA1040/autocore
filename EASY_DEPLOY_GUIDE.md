@@ -54,6 +54,11 @@ npm run commit-deploy
 deploy.bat
 ```
 
+**⚠️ Windsurf特有の問題と対処法:**
+- **権限エラー**: Git操作でアクセス拒否される場合
+- **ターミナル競合**: Windsurf内ターミナルでコマンド失敗する場合
+- **パス問題**: 相対パスが解決されない場合
+
 ### **🎭 Claude Code**
 既存の複雑なルールも使用可能、または上記の簡単な方法も利用可能
 
@@ -79,6 +84,85 @@ C:\Windsurf\scripts\simple-deploy.ps1
 # 解決策: Vercel CLI をインストール
 npm i -g vercel
 vercel login
+```
+
+### **🏄‍♀️ Windsurf固有の問題**
+
+#### **問題A: Git Push権限エラー**
+```bash
+# Windsurfのターミナルで権限エラーが出る場合
+# 解決策1: Windows PowerShellを直接使用
+# スタートメニュー → PowerShell → 管理者として実行
+cd C:\Windsurf\autocore
+git add . && git commit -m "feat: 機能追加" && git push
+
+# 解決策2: GitHub Desktop使用
+# GitHub Desktop → Changes → Commit → Push
+```
+
+#### **問題B: ターミナルコマンド実行失敗**
+```bash
+# Windsurfの統合ターミナルでコマンド失敗する場合
+# 解決策1: 外部ターミナル使用
+# Windows Terminal または PowerShell を別途起動
+
+# 解決策2: VSCode Terminal使用（もしインストール済みなら）
+# VSCode → Terminal → New Terminal
+
+# 解決策3: Claude Codeに依頼
+# Claude Codeはターミナル統合が優秀なため、デプロイ作業を依頼
+```
+
+#### **問題C: パス解決エラー**
+```bash
+# 相対パスが解決されない場合
+# ❌ 失敗例
+npm run commit-deploy
+
+# ✅ 解決策: 絶対パス指定
+cd C:\Windsurf\autocore
+npm run commit-deploy
+
+# または環境変数使用
+cd %USERPROFILE%\Windsurf\autocore
+npm run commit-deploy
+```
+
+#### **問題D: Node.js/npm認識されない**
+```bash
+# Windsurfでnpmコマンドが見つからない場合
+# 解決策1: フルパス指定
+C:\Program Files\nodejs\npm.exe run commit-deploy
+
+# 解決策2: 環境変数確認
+echo $env:PATH  # PowerShell
+echo %PATH%     # Command Prompt
+
+# 解決策3: Node.js再インストール
+# https://nodejs.org/ から最新版をダウンロード・インストール
+```
+
+### **🚨 Windsurf使用時の推奨ワークフロー**
+
+```bash
+# 1. 確実な方法（推奨）
+# Windows PowerShellを管理者として起動
+cd C:\Windsurf\autocore
+git status
+git add .
+git commit -m "feat: 新機能追加 🤖 Generated with Windsurf"
+git push origin main
+
+# 2. 代替方法
+# GitHub Desktopアプリを使用
+# - Changes タブで変更を確認
+# - Commit メッセージを入力
+# - "Commit to main" をクリック
+# - "Push origin" をクリック
+
+# 3. Claude Codeに依頼
+# 「プッシュ＆デプロイして」とClaude Codeに依頼
+# Claude Codeは git + vercel 操作が得意
 ```
 
 ---
