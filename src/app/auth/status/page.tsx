@@ -92,12 +92,12 @@ export default async function StatusPage() {
         {
           id: user.id,
           email: user.email!,
-          display_name: (user as any).user_metadata?.full_name || user.email!,
+          display_name: user.user_metadata?.full_name || user.email!,
           login_attempts: 1,
           last_attempt_at: new Date().toISOString(),
         }
       ])
-    if (pendErr && (pendErr as any).code !== '23505') {
+    if (pendErr && pendErr.code !== '23505') {
       console.error('Failed to record pending user on status page:', pendErr)
     }
   } catch (e) {

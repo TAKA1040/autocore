@@ -34,7 +34,7 @@ export default async function AdminPage() {
   }
 
   // プロフィールのロールを取得
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile } = await supabase
     .from('profiles')
     .select('role, status')
     .eq('id', user.id)

@@ -8,7 +8,6 @@ export async function GET(request: Request) {
   console.log('🚀 Callback route called')
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/'
 
   console.log('Code:', code ? 'Present' : 'Missing')
   console.log('Origin:', origin)
@@ -41,7 +40,7 @@ export async function GET(request: Request) {
                 }
               ])
 
-            if (pendingError && (pendingError as any).code !== '23505') {
+            if (pendingError && pendingError.code !== '23505') {
               console.log('Error inserting pending user:', pendingError)
             }
           } catch (err) {
