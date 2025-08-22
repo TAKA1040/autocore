@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "commit-deploy": "git add -A && git commit -m \"chore(deploy): push main for Vercel\" && git push origin main",
+    "deploy": "git push origin main",
+    "deploy:quick": "git push origin main"
   },
   "dependencies": {
     "@supabase/auth-helpers-nextjs": "^0.10.0",

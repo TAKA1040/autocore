@@ -204,4 +204,34 @@ deploy.bat "hotfix: 緊急修正"
 
 ---
 
+## 🌐 本番URLが更新されない時のチェックリスト（Vercel）
+
+1. **.vercel.app 直アクセスで差分確認**  
+   例: `https://<project>.vercel.app/menu`（日本語の「ようこそ、{email}」が出れば最新デプロイOK）
+
+2. **Production エイリアス確認（最新デプロイに紐付いているか）**  
+   Vercel → Project → Deployments → 最新の Production を開く → Aliases にカスタムドメインがあるか。  
+   ない場合は「Assign domain」または「Promote to Production」で現在のデプロイへ割当て。
+
+3. **Domains 設定（DNS）**  
+   Vercel → Project → Settings → Domains で `autocore-eapaf.me` が Ready か確認。  
+   - Apex(@): A `76.76.21.21`  
+   - www: CNAME `cname.vercel-dns.com`  
+   他サービスを向いていると旧画面が出続けます。
+
+4. **キャッシュ回避**  
+   `https://autocore-eapaf.me/menu?v=ts<適当な数値>` のようにクエリ付きで再読み込み。
+
+5. **環境変数**  
+   Vercel の Project → Settings → Environment Variables で  
+   `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` が設定済みか確認。
+
+6. **ワンコマンド再デプロイ**  
+   ガイド先頭のスクリプトで再トリガー可能:
+   ```bash
+   npm run commit-deploy   # 変更をコミットして main に push（Vercel 自動デプロイ）
+   ```
+
+---
+
 *このガイドにより、どのAIツールからでも **1～2コマンド** でプッシュ&デプロイが可能になります。*
