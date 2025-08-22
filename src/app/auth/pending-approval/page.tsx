@@ -2,8 +2,9 @@
 
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 
-export default function PendingApprovalPage() {
+function PendingApprovalContent() {
   const searchParams = useSearchParams()
   const email = searchParams.get('email')
 
@@ -44,5 +45,13 @@ export default function PendingApprovalPage() {
         </Link>
       </div>
     </div>
+  )
+}
+
+export default function PendingApprovalPage() {
+  return (
+    <Suspense>
+      <PendingApprovalContent />
+    </Suspense>
   )
 }
