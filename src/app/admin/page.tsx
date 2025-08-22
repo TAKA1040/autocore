@@ -1,4 +1,4 @@
-import 'server-only'
+// server-only removed (no-op in runtime, not required)
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { isAdminEmail } from '@/lib/auth-config'
