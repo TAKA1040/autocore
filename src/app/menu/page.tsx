@@ -51,9 +51,7 @@ export default async function MenuPage() {
             <p className="text-sm text-gray-500">有効化されたツールがありません。管理者は「ツール設定」から追加・有効化できます。</p>
           )}
 
-          <button className="w-full px-4 py-2 font-bold text-white bg-green-500 rounded hover:bg-green-700">
-            はじめに
-          </button>
+          
 
           {isAdmin && (
             <div className="space-y-2">
