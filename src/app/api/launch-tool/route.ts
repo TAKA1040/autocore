@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
-  const { tool_id, suppress_open } = await request.json() as any
+  const { tool_id, suppress_open } = await request.json() as { tool_id: string, suppress_open: boolean }
   if (!tool_id) {
     return new NextResponse('Missing tool_id', { status: 400 })
   }

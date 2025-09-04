@@ -233,7 +233,7 @@ export default function AdminSettingsPage() {
     setSimpleTemplate(extractedTemplate)
 
     // Windows Terminal使用の判定
-    const usesWT = tool.command && tool.command.includes('wt ')
+    const usesWT = !!(tool.command && tool.command.includes('wt '))
     setOpenInWindowsTerminal(usesWT)
   }
 
@@ -303,7 +303,7 @@ export default function AdminSettingsPage() {
                   </div>
                   <div>
                     <label htmlFor="simple-runner" className="block text-sm font-medium text-gray-700">起動方法</label>
-                    <select id="simple-runner" value={simpleRunner} onChange={(e) => setSimpleRunner(e.target.value as any)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <select id="simple-runner" value={simpleRunner} onChange={(e) => setSimpleRunner(e.target.value as 'npm' | 'pnpm' | 'bun')} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                       <option value="npm">npm run dev</option>
                       <option value="pnpm">pnpm dev</option>
                       <option value="bun">bun dev</option>
@@ -311,7 +311,7 @@ export default function AdminSettingsPage() {
                   </div>
                   <div>
                     <label htmlFor="simple-template" className="block text-sm font-medium text-gray-700">テンプレート</label>
-                    <select id="simple-template" value={simpleTemplate} onChange={(e) => setSimpleTemplate(e.target.value as any)} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <select id="simple-template" value={simpleTemplate} onChange={(e) => setSimpleTemplate(e.target.value as 'auto' | 'next' | 'vite' | 'generic')} className="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                       <option value="auto">自動（-- --port PORT）[推奨]</option>
                       <option value="next">Next.js（-- --port PORT）</option>
                       <option value="vite">Vite（-- --port PORT）</option>
