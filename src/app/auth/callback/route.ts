@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '../../../lib/supabase/server'
-import { AUTH_CONFIG, isPreApprovedEmail } from '../../../lib/auth-config'
+import { AUTH_CONFIG, isPreApprovedEmailFromEnv } from '../../../lib/auth-config'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,10 +22,10 @@ export async function GET(request: Request) {
       
       if (user && user.email) {
         console.log('Callback - User authenticated:', user.email, 'ID:', user.id)
-        console.log('Callback - Pre-approved check:', isPreApprovedEmail(user.email))
+        console.log('Callback - Pre-approved check:', isPreApprovedEmailFromEnv(user.email))
         
         // 事前承認でなくてもログイン状態を維持して /auth/status へ誘導
-        if (!isPreApprovedEmail(user.email)) {
+        if (!isPreApprovedEmailFromEnv(user.email)) {
           console.log('Callback - Not pre-approved, recording to pending_users (audit)')
           try {
             const { error: pendingError } = await supabase

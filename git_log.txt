@@ -1,0 +1,20 @@
+664567b 2025-08-22 | fix: SuspenseでuseSearchParamsをラップ
+1625970 2025-08-22 | fix: SuspenseでuseSearchParamsをラップ
+58f3f22 2025-08-22 | fix: ESLintのエラーと警告を修正
+807b682 2025-08-22 | chore(build): lockfile-only update & approve builds (pnpm v10)
+a245e67 2025-08-22 | chore(deploy): push main for Vercel
+634d551 2025-08-22 | chore(deploy): push main for Vercel
+68ff8be 2025-08-22 | docs: Enhanced EASY_DEPLOY_GUIDE with comprehensive Windsurf troubleshooting
+1d204c7 2025-08-22 | fix: 認証フロー修正と承認システム完全化
+9dafd16 2025-08-22 | fix(vercel): remove server-only imports and adjust deps
+abf8361 2025-08-22 | fix(vercel): add server-only dep and update lockfile placeholder
+cfebbc5 2025-08-22 | chore(deploy): trigger Vercel build
+6413c6c 2025-08-22 | feat(admin): add self-/last-admin guard (UI+DB) and Netlify config
+9a2ca55 2025-08-22 | feat: 承認システム完全実装
+6ab15e2 2025-08-21 | fix: statusページの型エラーを修正
+7ee6061 2025-08-21 | feat: プロファイル取得にRPCを実装
+1667e02 2025-08-21 | fix: RLSポリシーを更新し、エラーメッセージを改善
+a12cc0e 2025-08-21 | feat: 承認フローとステータスページを追加
+b7b05de 2025-08-21 | refactor: サーバーサイドで認証チェックするようにmenuページを修正
+cf2e177 2025-08-21 | feat: ログインページのUIを改善し、マニュアルを追加
+29fec3b 2025-08-20 | fix: createClient を非同期化し、呼び出し元で await するように修正

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { isAdminEmail } from '@/lib/auth-config'
+// 管理者判定のメール直書きは廃止（デバッグ画面では表示のみ）
 import { User } from '@supabase/supabase-js'
 
 export default function DebugPage() {
@@ -65,7 +65,8 @@ export default function DebugPage() {
             <div className="text-green-600">
               <div>✅ ログイン済み: {user.email}</div>
               <div>🆔 User ID: {user.id}</div>
-              <div>👑 Admin: {isAdminEmail(user.email) ? 'YES' : 'NO'}</div>
+              {/* Admin情報の判定は削除（必要なら別途APIで取得） */}
+              <div>👑 Admin: (hidden)</div>
             </div>
           ) : (
             <div className="text-red-600">❌ 未ログイン</div>
@@ -91,14 +92,7 @@ export default function DebugPage() {
               >
                 Go to Menu
               </a>
-              {isAdminEmail(user.email) && (
-                <a
-                  href="/admin"
-                  className="inline-block px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"
-                >
-                  👑 Admin Dashboard
-                </a>
-              )}
+              {/* 管理者リンクの条件表示は削除 */}
             </div>
           )}
         </div>

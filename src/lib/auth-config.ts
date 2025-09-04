@@ -1,43 +1,36 @@
-// 認証設定ファイル
+// 認証設定（メール直書きは廃止）
 export const AUTH_CONFIG = {
-  // 管理者メールアドレス（自動承認される）
-  ADMIN_EMAILS: [
-    'dash201206@gmail.com'
-  ],
-  
-  // 事前承認済みメールアドレス（自動承認される）
-  PRE_APPROVED_EMAILS: [
-    'startdash.z@gmail.com',
-    'dash201206@gmail.com'
-  ],
-  
-  // デフォルトユーザー設定
+  // 既定ロール/ステータス
   DEFAULT_USER_STATUS: 'PENDING' as const,
   DEFAULT_USER_ROLE: 'USER' as const,
   DEFAULT_ADMIN_ROLE: 'ADMIN' as const,
-  
+
   // リダイレクト設定
   REDIRECTS: {
     AFTER_LOGIN: '/menu',
     AFTER_LOGOUT: '/login',
     UNAUTHORIZED: '/auth/unauthorized',
     AUTH_ERROR: '/auth/auth-code-error',
-    PENDING_APPROVAL: '/auth/pending-approval'
-  }
+    PENDING_APPROVAL: '/auth/pending-approval',
+  },
 }
 
-// ヘルパー関数
-export const isPreApprovedEmail = (email: string | null | undefined): boolean => {
+// 事前承認メール: 環境変数 PRE_APPROVED_EMAILS（CSV）から判定（サーバ専用）
+export const isPreApprovedEmailFromEnv = (
+  email: string | null | undefined,
+): boolean => {
   if (!email) return false
-  return AUTH_CONFIG.PRE_APPROVED_EMAILS.includes(email)
+  const csv = (process.env.PRE_APPROVED_EMAILS || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean)
+  return csv.includes(email.toLowerCase())
 }
 
-export const isAdminEmail = (email: string | null | undefined): boolean => {
-  if (!email) return false
-  return AUTH_CONFIG.ADMIN_EMAILS.includes(email)
-}
-
-export const getUserRole = (email: string | null | undefined): 'ADMIN' | 'USER' => {
-  if (isAdminEmail(email)) return AUTH_CONFIG.DEFAULT_ADMIN_ROLE
+// 初期ロールは既定ユーザーロール。管理者付与はDB（profiles.role）で行う。
+export const getUserRole = (
+  _email: string | null | undefined,
+): 'ADMIN' | 'USER' => {
   return AUTH_CONFIG.DEFAULT_USER_ROLE
 }
+
