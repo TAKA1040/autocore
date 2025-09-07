@@ -63,12 +63,25 @@ export async function POST(request: Request) {
   }
 
   try {
-    // そのままシェルで実行（"&&"/クォート等の複合コマンドを許容）
-    const proc = spawn(tool.command, {
-      shell: true,
-      detached: true,
-      stdio: 'ignore'
-    })
+    // Windowsで新しいコマンドウィンドウを開くための設定
+    const isWindows = process.platform === 'win32'
+    let proc: any
+    
+    if (isWindows) {
+      // Windowsでは新しいcmdウィンドウでコマンドを実行
+      proc = spawn('cmd', ['/c', 'start', 'cmd', '/k', tool.command], {
+        detached: true,
+        stdio: 'ignore'
+      })
+    } else {
+      // その他のOSでは通常の実行
+      proc = spawn(tool.command, {
+        shell: true,
+        detached: true,
+        stdio: 'ignore'
+      })
+    }
+    
     proc.on('error', (e) => console.error('Failed to spawn:', e))
     proc.unref()
 
