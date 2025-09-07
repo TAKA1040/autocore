@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { spawn } from 'child_process'
+import { spawn, ChildProcess } from 'child_process'
 import { runningProcesses } from '@/lib/process-manager'
 
 export async function POST(request: Request) {
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   try {
     // Windowsで新しいコマンドウィンドウを開くための設定
     const isWindows = process.platform === 'win32'
-    let proc: any
+    let proc: ChildProcess
     
     if (isWindows) {
       // Windowsでは新しいcmdウィンドウでコマンドを実行
