@@ -6,15 +6,9 @@ import { type User } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import LogoutButton from '@/app/menu/LogoutButton'
+import type { Tool } from '@/types/tool'
 
 // Type definitions
-interface Tool {
-  id: string
-  name: string
-  command: string
-  port: number | null
-  enabled: boolean
-}
 
 interface AllowedPath {
   id: string

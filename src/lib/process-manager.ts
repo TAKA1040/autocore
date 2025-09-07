@@ -29,7 +29,7 @@ const cleanupProcesses = () => {
     try {
       // Windowsで特定のプロセスをPIDで強制終了するコマンド
       const command = `taskkill /F /PID ${pid}`;
-      exec(command, (error, stdout, stderr) => {
+      exec(command, (error) => {
         if (error) {
           // すでにプロセスが存在しない場合などのエラーは無視して良い
           // console.error(`Failed to kill process ${pid}:`, stderr);

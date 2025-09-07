@@ -1,13 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-
-interface Tool {
-  id: string
-  name: string
-  port?: number
-  launch_url?: string
-}
+import type { Tool } from '@/types/tool'
 
 interface ToolButtonsProps {
   tools: Tool[]

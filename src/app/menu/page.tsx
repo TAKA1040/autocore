@@ -7,16 +7,9 @@ import { type User } from '@supabase/supabase-js'
 import LogoutButton from './LogoutButton'
 import Link from 'next/link'
 import ToolButtons from './ToolButtons'
+import type { Tool } from '@/types/tool'
 
 // 型定義
-interface Tool {
-  id: string;
-  name: string;
-  command: string;
-  port: number | null;
-  enabled: boolean;
-  launch_url?: string;
-}
 
 interface RunningProcess {
   toolId: string;
