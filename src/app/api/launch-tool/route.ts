@@ -68,11 +68,19 @@ export async function POST(request: Request) {
     let proc: ChildProcess
     
     if (isWindows) {
-      // Windowsでは新しいcmdウィンドウでコマンドを実行
-      proc = spawn('cmd', ['/c', 'start', '"Tool Window"', '/D', '.', 'cmd', '/k', tool.command], {
-        detached: true,
-        stdio: 'ignore'
-      })
+      // Windows Terminal (wt) コマンドの場合は直接実行
+      if (tool.command.startsWith('wt ')) {
+        proc = spawn('cmd', ['/c', tool.command], {
+          detached: true,
+          stdio: 'ignore'
+        })
+      } else {
+        // その他のコマンドは新しいcmdウィンドウで実行
+        proc = spawn('cmd', ['/c', 'start', '"Tool Window"', '/D', '.', 'cmd', '/k', tool.command], {
+          detached: true,
+          stdio: 'ignore'
+        })
+      }
     } else {
       // その他のOSでは通常の実行
       proc = spawn(tool.command, {
