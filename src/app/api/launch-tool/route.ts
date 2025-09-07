@@ -70,12 +70,22 @@ export async function POST(request: Request) {
     if (isWindows) {
       // Windows Terminal (wt) コマンドの場合は直接実行
       if (tool.command.startsWith('wt ')) {
+        console.log(`Executing Windows Terminal command: ${tool.command}`)
         proc = spawn('cmd', ['/c', tool.command], {
           detached: true,
-          stdio: 'ignore'
+          stdio: ['ignore', 'pipe', 'pipe']
+        })
+        
+        // エラーログを収集
+        proc.stdout?.on('data', (data) => {
+          console.log(`WT stdout: ${data}`)
+        })
+        proc.stderr?.on('data', (data) => {
+          console.error(`WT stderr: ${data}`)
         })
       } else {
         // その他のコマンドは新しいcmdウィンドウで実行
+        console.log(`Executing regular command: ${tool.command}`)
         proc = spawn('cmd', ['/c', 'start', '"Tool Window"', '/D', '.', 'cmd', '/k', tool.command], {
           detached: true,
           stdio: 'ignore'

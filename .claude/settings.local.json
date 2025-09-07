@@ -15,7 +15,10 @@
       "Bash(wmic:*)",
       "Read(//c/Windsurf/autocore/**)",
       "Bash(vercel:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(wt:*)",
+      "Bash(where:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []
