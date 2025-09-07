@@ -200,7 +200,7 @@ export default function AdminSettingsPage() {
   const handleEditClick = (tool: Tool) => {
     setEditingToolId(tool.id)
     setToolName(tool.name)
-    setToolCommand(tool.command)
+    setToolCommand(tool.command || '')
     setToolPort(tool.port ? String(tool.port) : '')
 
     // 既存ツールの編集時は簡単モードをONにして、適切な初期値を設定
