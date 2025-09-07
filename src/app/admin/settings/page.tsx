@@ -108,7 +108,9 @@ export default function AdminSettingsPage() {
 
     if (useWindowsTerminal) {
       // 最終使用の Windows Terminal ウィンドウ(-w last)に新規タブ(nt)で開く（無い場合は新規）
-      return `wt -w last nt -d "${cwd}" cmd /k "${cmdInside}"`
+      // 引用符をエスケープして内部コマンドの引数が正しく渡されるようにする
+      const escapedCmdInside = cmdInside.replace(/"/g, '\\"')
+      return `wt -w last nt -d "${cwd}" cmd /k "${escapedCmdInside}"`
     }
     // 既定: 新しい cmd を起動して CWD に移動してから実行
     return `cmd /c start "" cmd /k "cd /d \"${cwd}\" && ${cmdInside}"`
