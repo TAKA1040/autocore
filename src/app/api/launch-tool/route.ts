@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { spawn } from 'child_process'
+import { runningProcesses } from '@/lib/process-manager'
 
 export async function POST(request: Request) {
   const supabase = await createClient()
@@ -70,7 +71,19 @@ export async function POST(request: Request) {
     })
     proc.on('error', (e) => console.error('Failed to spawn:', e))
     proc.unref()
-    console.log(`Launched: ${tool.command} (PID: ${proc.pid})`)
+
+    if (proc.pid) {
+      console.log(`Launched: ${tool.command} (PID: ${proc.pid})`)
+      runningProcesses.set(proc.pid, {
+        toolId: tool.id,
+        toolName: tool.name,
+        pid: proc.pid,
+        port: tool.port ?? null,
+        startTime: new Date().toISOString(),
+      })
+    } else {
+      console.log(`Launched: ${tool.command} (PID not available)`)
+    }
 
     // port が設定されていれば、起動完了（HTTP応答）を待ってからブラウザを開く（suppress_open=false のときのみ）
     if (!suppress_open && tool.port && Number.isInteger(tool.port) && tool.port > 0 && tool.port <= 65535) {
