@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     
     if (isWindows) {
       // Windowsでは新しいcmdウィンドウでコマンドを実行
-      proc = spawn('cmd', ['/c', 'start', 'cmd', '/k', tool.command], {
+      proc = spawn('cmd', ['/c', 'start', '"Tool Window"', '/D', '.', 'cmd', '/k', tool.command], {
         detached: true,
         stdio: 'ignore'
       })
