@@ -14,7 +14,8 @@
       "Bash(git commit:*)",
       "Bash(wmic:*)",
       "Read(//c/Windsurf/autocore/**)",
-      "Bash(vercel:*)"
+      "Bash(vercel:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
