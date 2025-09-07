@@ -18,7 +18,8 @@
       "Bash(curl:*)",
       "Bash(wt:*)",
       "Bash(where:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

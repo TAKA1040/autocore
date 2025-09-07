@@ -71,7 +71,9 @@ export async function POST(request: Request) {
       // Windows Terminal (wt) コマンドの場合は直接実行
       if (tool.command.startsWith('wt ')) {
         console.log(`Executing Windows Terminal command: ${tool.command}`)
-        proc = spawn('cmd', ['/c', tool.command], {
+        // wtコマンドをshellを通して実行（引用符の処理を正しく行うため）
+        proc = spawn(tool.command, {
+          shell: true,
           detached: true,
           stdio: ['ignore', 'pipe', 'pipe']
         })
